@@ -51,7 +51,7 @@ Record the output in `reports/00-environment.txt`.
 
 ## Phase 1 - read the case
 
-Read `README.md`, `HARDWARE.md`, `CHRONOLOGY.md`, `WHAT_INFLUENCES_WHAT.md`
+Read `README.en.md`, `HARDWARE.md`, `CHRONOLOGY.md`, `WHAT_INFLUENCES_WHAT.md`
 and the result documents under `docs/`. Confirm the adopted configuration:
 
 ```text
@@ -194,7 +194,7 @@ step rather than guessing.
 
 ## Short version (if the agent has little context)
 
-> Read `README.md` and `RUNBOOK.md`, verify the three sm_75 GPUs, download the
+> Read `README.en.md` and `RUNBOOK.md`, verify the three sm_75 GPUs, download the
 > model and projector with the checksums from the runbook, run
 > `scripts/launch-server.sh`, confirm `--version` contains `df03399` and the
 > smoke answer is `2 + 2 = 4`, then measure decode-500 with
