@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname -- "${BASH_SOURCE[0]}")/.."
 
 PATTERNS='package api|package service|internal/api/|internal/service/|internal/model/|internal/store/|webUI/src/|/home/manglobite|manglobite|sk-[A-Za-z0-9]{13,}'
-EXCL=(':(exclude)llama.cpp/src' ':(exclude)docs/dialogues' ':(exclude)scripts/check-public.sh')
+EXCL=(':(exclude)llama.cpp/src' ':(exclude)scripts/check-public.sh')
 
 echo "== working tree =="
 if hits=$(git grep -lE "$PATTERNS" -- . "${EXCL[@]}"); then
