@@ -82,26 +82,26 @@ class RawTimingAlignmentTest(unittest.TestCase):
 
 
 class ProfilePairsTest(unittest.TestCase):
+    PREFIX = "llama-cpp-qwen36-35b-a3b-uncensored-q4-3gpu-df03399-"
+    PAIRS = [
+        ("baseline.json", "dp2a.json"),
+        ("dp2a.json", "dp2a-no-fmad.json"),
+    ]
+
     def test_pairs_only_differ_by_runtime_identity(self):
-        pairs = [
-            ("llama-cpp-deepseek-r1-qwen3-8b-q4-cmp50hx-baseline.json", "llama-cpp-deepseek-r1-qwen3-8b-q4-cmp50hx-dp2a.json"),
-            ("llama-cpp-deepseek-r1-qwen3-8b-q4-cmp50hx-flash-off-baseline.json", "llama-cpp-deepseek-r1-qwen3-8b-q4-cmp50hx-flash-off-dp2a.json"),
-            ("llama-cpp-seed-coder-8b-q5-cmp50hx-baseline.json", "llama-cpp-seed-coder-8b-q5-cmp50hx-dp2a.json"),
-            ("llama-cpp-qwen25-coder-3b-q8-cmp50hx-baseline.json", "llama-cpp-qwen25-coder-3b-q8-cmp50hx-dp2a.json"),
-            ("llama-cpp-qwen25-coder-3b-q8-flash-cmp50hx-baseline.json", "llama-cpp-qwen25-coder-3b-q8-flash-cmp50hx-dp2a.json"),
-            ("llama-cpp-qwen35-4b-q8-cmp50hx-baseline.json", "llama-cpp-qwen35-4b-q8-cmp50hx-dp2a.json"),
-            ("llama-cpp-qwen35-4b-q8-flash-cmp50hx-baseline.json", "llama-cpp-qwen35-4b-q8-flash-cmp50hx-dp2a.json"),
-        ]
         profiles = RUN.ROOT / "benchmarks/profiles"
-        for baseline_name, dp2a_name in pairs:
+        for baseline_name, dp2a_name in self.PAIRS:
             with self.subTest(pair=(baseline_name, dp2a_name)):
-                baseline = json.loads((profiles / baseline_name).read_text())
-                dp2a = json.loads((profiles / dp2a_name).read_text())
-                for profile in (baseline, dp2a):
+                normalized = []
+                for name in (baseline_name, dp2a_name):
+                    profile = json.loads((profiles / (self.PREFIX + name)).read_text())
                     profile.pop("name")
                     profile.pop("binary")
                     profile.pop("build_variant")
-                self.assertEqual(baseline, dp2a)
+                    for variant in profile.get("profiles", {}).values():
+                        variant.pop("port", None)
+                    normalized.append(profile)
+                self.assertEqual(normalized[0], normalized[1])
 
 
 if __name__ == "__main__":
