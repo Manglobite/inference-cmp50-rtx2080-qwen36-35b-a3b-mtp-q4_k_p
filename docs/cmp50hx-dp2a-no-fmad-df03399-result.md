@@ -1,5 +1,7 @@
 # DP2A + `--fmad=false` on Qwen3.6-35B-A3B: A/B result (df03399)
 
+**English** | [Русский](cmp50hx-dp2a-no-fmad-df03399-result.ru.md)
+
 ## Status
 
 Completed 2026-09-16. Accepted and activated in production for the tested

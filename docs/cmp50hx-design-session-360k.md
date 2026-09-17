@@ -1,4 +1,5 @@
 # Design-session test at 360K: microblog service, agent-style tools (16-17.09.2026)
+**English** | [Русский](cmp50hx-design-session-360k.ru.md)
 
 ## Status
 

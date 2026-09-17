@@ -1,5 +1,7 @@
 # Two Go design sessions with a chaotic user at 360K (17.09.2026)
 
+**English** | [Русский](cmp50hx-design-sessions-go-2apps.ru.md)
+
 ## Status
 
 Completed 2026-09-17. Two full design sessions on the adopted RTX-tail 360k

@@ -1,5 +1,7 @@
 # DP2A on Qwen3.6-35B-A3B three-GPU profile: A/B result (df03399)
 
+**English** | [Русский](cmp50hx-dp2a-df03399-result.ru.md)
+
 ## Status
 
 Completed 2026-09-15. DP2A is accepted for the tested Qwen3.6-35B-A3B

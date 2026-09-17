@@ -1,4 +1,5 @@
 # Layer split, ubatch and MTP placement on Qwen3.6-35B-A3B (df03399)
+**English** | [Русский](cmp50hx-split-ubatch-mtp-df03399-result.ru.md)
 
 ## Status
 

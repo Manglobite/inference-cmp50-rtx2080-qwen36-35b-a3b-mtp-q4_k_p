@@ -86,8 +86,8 @@ qwen36-35b-a3b/
 
 Language convention: every human-facing document has an English `*.md` and a
 Russian `*.ru.md` twin with a switcher line at the top. `AGENT_PROMPT.md` is
-English-only on purpose - it is written for an automated agent. The detailed
-result reports under `docs/` are English-only for now.
+English-only on purpose - it is written for an automated agent. The result
+reports under `docs/` follow the same EN + RU convention.
 
 ## What is here and where to read more
 
