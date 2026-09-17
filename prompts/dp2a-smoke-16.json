@@ -1,0 +1,14 @@
+{
+  "cases": [
+    {
+      "id": "dp2a-smoke-16",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Reply with exactly this text and nothing else: CMP DP2A smoke test passed."
+        }
+      ],
+      "max_tokens": 16
+    }
+  ]
+}

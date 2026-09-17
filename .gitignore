@@ -1,0 +1,16 @@
+# Model weights are large and not committed.
+models/*.gguf
+
+# Raw benchmark runs are generated locally.
+benchmarks/results/
+
+# Local build trees if someone builds inside the case.
+llama.cpp/runtime-baseline/
+llama.cpp/runtime-dp2a/
+llama.cpp/src/build/
+llama.cpp/src/build-*/
+llama.cpp/runtime/
+llama.cpp/src/
+models/
+benchmarks/results/
+dist/

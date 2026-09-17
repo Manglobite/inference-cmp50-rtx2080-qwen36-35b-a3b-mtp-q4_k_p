@@ -1,0 +1,61 @@
+{
+  "variant": "qwen36-df03399-dp2a-no-fmad",
+  "purpose": "llama.cpp CUDA runtime from df03399 with the ported PR #25834 DP2A patch plus nvcc -fmad=false, the CMP 50HX FMA-throttling workaround.",
+  "llama_cpp_source": "/tmp/opencode/llama.cpp-df03399-dp2a-no-fmad",
+  "llama_cpp_upstream_repo": "https://github.com/ggml-org/llama.cpp",
+  "source_worktree_of": "$HOME/inference/research/qwen38-27b-autonomous-20260910/llama.cpp-upstream",
+  "llama_cpp_commit": "df03399b885831b2a1603b3abb0d8c156808e363",
+  "patch": {
+    "source_url": "https://github.com/ggml-org/llama.cpp/pull/25834.diff",
+    "source_sha256": "641ba95eb0649c04759e6cdfbcaef4b99146b99efce569d9d4dd0d7019a450b2",
+    "ported_patch_path": "tools/llama-cpp/qwen36-df03399-dp2a/patches/25834-df03399-port.patch",
+    "sha256": "dd73bdea36f9823c507918a997dbd279c1dff7a8d36cf0408d4151f4f2bf81d0",
+    "applied": true
+  },
+  "cmake_options": [
+    "-DGGML_CUDA=ON",
+    "-DGGML_CUDA_NCCL=ON",
+    "-DGGML_CUDA_DISABLE_DP4A=ON",
+    "-DCMAKE_CUDA_FLAGS=-fmad=false",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_CUDA_ARCHITECTURES=75",
+    "-DCMAKE_BUILD_RPATH_USE_ORIGIN=ON"
+  ],
+  "cuda_architecture": "75",
+  "nvcc_version": "Cuda compilation tools, release 12.4, V12.4.131",
+  "cmake_version": "cmake version 4.2.3",
+  "built_at_utc": "2026-09-16T06:36:11Z",
+  "build_job_limit": 12,
+  "build_memory_max": "16G",
+  "build_memory_swap_max": "0",
+  "fmad_false_verification": "ggml/src/ggml-cuda CMakeFiles flags.make CUDA_FLAGS starts with -fmad=false; local nvcc probe shows -fmad=false suppresses FFMA (FFMA=0, FMUL/FADD emitted) even when -use_fast_math is also present",
+  "files": {
+    "bin/libggml-base.so.0.23.0": "a621ce42f0491129f4a39b3d95c9b2187d1077651e3f1ddb54db92cb3c9593de",
+    "bin/libggml-cpu.so.0.23.0": "cb2c2cb7de5f0568632fc7d26ab36fc53de8431ca14bbb75739ef3c52efd8ec2",
+    "bin/libggml-cuda.so.0.23.0": "325623d2469b8b9de167e3da45cac4da7361edc2e9d8221066bb3d5c0aabc2d4",
+    "bin/libggml.so.0.23.0": "3c6258773087a0720d3685cd316fad36ca895fa34f2bc740fd705dd7eb051bd7",
+    "bin/libllama-common.so.0.4.0": "fc6638cb3c5114c2fa4cd71435e8364b43bf52dd74719374fd898df763ea4d72",
+    "bin/libllama-server-impl.so": "502f1776e95d8afe524d1c20053c2e8eb138f8096161612470b86cd33ffa7a1f",
+    "bin/libllama.so.0.4.0": "937a949c402767d8585838a8a0e0b71d4e6c66d3ca8038bb5751172a1cff0218",
+    "bin/libmtmd.so.0.4.0": "ea80e49683b78701dad5f83b4b278d4c20a0d53eba0d4a4a42a298ace3c9623b",
+    "bin/llama-server": "fc1896e8c348183020b5484cb5a23dee215e238250038acb4ef00de2438c6d65"
+  },
+  "symlinks": {
+    "bin/libggml-base.so": "libggml-base.so.0",
+    "bin/libggml-base.so.0": "libggml-base.so.0.23.0",
+    "bin/libggml-cpu.so": "libggml-cpu.so.0",
+    "bin/libggml-cpu.so.0": "libggml-cpu.so.0.23.0",
+    "bin/libggml-cuda.so": "libggml-cuda.so.0",
+    "bin/libggml-cuda.so.0": "libggml-cuda.so.0.23.0",
+    "bin/libggml.so": "libggml.so.0",
+    "bin/libggml.so.0": "libggml.so.0.23.0",
+    "bin/libllama-common.so": "libllama-common.so.0",
+    "bin/libllama-common.so.0": "libllama-common.so.0.4.0",
+    "bin/libllama.so": "libllama.so.0",
+    "bin/libllama.so.0": "libllama.so.0.4.0",
+    "bin/libmtmd.so": "libmtmd.so.0",
+    "bin/libmtmd.so.0": "libmtmd.so.0.4.0"
+  },
+  "runtime_runpath": "$ORIGIN",
+  "status": "built and packaged; pending runtime validation"
+}

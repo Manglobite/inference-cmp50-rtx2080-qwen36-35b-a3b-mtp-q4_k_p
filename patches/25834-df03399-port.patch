@@ -1,0 +1,68 @@
+diff --git a/docs/build.md b/docs/build.md
+index 28dcbc2..7dab15e 100644
+--- a/docs/build.md
++++ b/docs/build.md
+@@ -302,6 +302,7 @@ The following compilation options are also available to tweak performance:
+ | GGML_CUDA_FORCE_CUBLAS        | Boolean                | false   | Force the use of FP16 cuBLAS instead of custom matrix multiplication kernels for quantized models. There may be issues with numerical overflows (except for V100, CDNA and RDNA4 which use FP32 compute type by default) and memory use will be higher. Prompt processing may become faster on recent datacenter GPUs (the custom kernels were tuned primarily for RTX 3000/4000).   |
+ | GGML_CUDA_FA_QUANTS           | `all` or `type_K-type_V` list | q4_0-q4_0;q8_0-q8_0;f16-f16;bf16-bf16 | Select which K/V type combinations to compile the FlashAttention CUDA kernels for. `all` compiles every combination, but compilation takes much longer. Otherwise a `;`-separated list of `type_K-type_V` pairs; f16-f16 is always compiled. Combinations that were not compiled fall back to f16-f16 kernel with a warning. Legal types: f16, bf16, q4_0, q4_1, q5_0, q5_1, q8_0. |
+ | GGML_CUDA_FA_ALL_QUANTS       | Boolean                | false   | Deprecated alias for `GGML_CUDA_FA_QUANTS=all`.                                                                                                                                                                                                                                                                                                                               |
++| GGML_CUDA_DISABLE_DP4A        | Boolean                | false   | Use DP2A instead of DP4A in CUDA kernels. This can improve decode performance on some NVIDIA CMP cards that expose DP4A but execute it at a reduced rate.                                                                                                                                                                                                                     |
+ 
+ ## MUSA
+ 
+diff --git a/ggml/CMakeLists.txt b/ggml/CMakeLists.txt
+index ba9bc83..f9f7390 100644
+--- a/ggml/CMakeLists.txt
++++ b/ggml/CMakeLists.txt
+@@ -199,6 +199,7 @@ option(GGML_LLAMAFILE                       "ggml: use LLAMAFILE"
+ option(GGML_CUDA                            "ggml: use CUDA"                                  OFF)
+ option(GGML_MUSA                            "ggml: use MUSA"                                  OFF)
+ option(GGML_CUDA_FORCE_MMQ                  "ggml: use mmq kernels instead of cuBLAS"         OFF)
++option(GGML_CUDA_DISABLE_DP4A               "ggml: use DP2A instead of DP4A for CUDA kernels" OFF)
+ option(GGML_CUDA_FORCE_CUBLAS               "ggml: always use cuBLAS instead of mmq kernels"  OFF)
+ option(GGML_CUDA_NO_PEER_COPY               "ggml: do not use peer to peer copies"            OFF)
+ option(GGML_CUDA_NO_VMM                     "ggml: do not try to use CUDA VMM"                OFF)
+diff --git a/ggml/src/ggml-cuda/CMakeLists.txt b/ggml/src/ggml-cuda/CMakeLists.txt
+index 2254090..23c9193 100644
+--- a/ggml/src/ggml-cuda/CMakeLists.txt
++++ b/ggml/src/ggml-cuda/CMakeLists.txt
+@@ -128,6 +128,10 @@ if (CUDAToolkit_FOUND)
+         add_compile_definitions(GGML_CUDA_FORCE_MMQ)
+     endif()
+ 
++    if (GGML_CUDA_DISABLE_DP4A)
++        add_compile_definitions(GGML_CUDA_DISABLE_DP4A)
++    endif()
++
+     if (GGML_CUDA_FORCE_CUBLAS)
+         add_compile_definitions(GGML_CUDA_FORCE_CUBLAS)
+     endif()
+diff --git a/ggml/src/ggml-cuda/common.cuh b/ggml/src/ggml-cuda/common.cuh
+index 7d14ce9..7e207fa 100644
+--- a/ggml/src/ggml-cuda/common.cuh
++++ b/ggml/src/ggml-cuda/common.cuh
+@@ -740,8 +740,23 @@ static __device__ __forceinline__ int ggml_cuda_dp4a(const int a, const int b, i
+ 
+ #else // defined(GGML_USE_HIP)
+ 
+-#if __CUDA_ARCH__ >= GGML_CUDA_CC_DP4A || defined(GGML_USE_MUSA)
++#if (__CUDA_ARCH__ >= GGML_CUDA_CC_DP4A || defined(GGML_USE_MUSA)) && \
++    !defined(GGML_CUDA_DISABLE_DP4A)
+     return __dp4a(a, b, c);
++#elif defined(GGML_CUDA_DISABLE_DP4A) && __CUDA_ARCH__ >= GGML_CUDA_CC_DP4A
++    // Some NVIDIA CMP cards expose DP4A but execute it at a heavily reduced
++    // rate. Use two DP2A instructions instead when explicitly requested.
++    int a_lo;
++    int a_hi;
++    asm("prmt.b32 %0, %1, 0, 0x9180;" : "=r"(a_lo) : "r"(a));
++    asm("prmt.b32 %0, %1, 0, 0xB3A2;" : "=r"(a_hi) : "r"(a));
++    asm("dp2a.lo.s32.s32 %0, %1, %2, %0;"
++        : "+r"(c)
++        : "r"(a_lo), "r"(b));
++    asm("dp2a.hi.s32.s32 %0, %1, %2, %0;"
++        : "+r"(c)
++        : "r"(a_hi), "r"(b));
++    return c;
+ #else // __CUDA_ARCH__ >= GGML_CUDA_CC_DP4A || defined(GGML_USE_MUSA)
+     const int8_t * a8 = (const int8_t *) &a;
+     const int8_t * b8 = (const int8_t *) &b;
