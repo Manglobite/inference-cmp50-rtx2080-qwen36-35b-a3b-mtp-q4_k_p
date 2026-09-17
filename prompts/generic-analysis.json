@@ -1,0 +1,45 @@
+[
+  {
+    "id": "decode-300",
+    "max_tokens": 300,
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a precise systems analysis assistant. Answer directly, cite concrete evidence from the supplied context, and do not reveal chain-of-thought."
+      },
+      {
+        "role": "user",
+        "content": "You are reviewing a Go service that schedules background jobs. From this compact map: main.go starts HTTP servers; api/router.go registers routes; service/worker/lifecycle.go starts worker processes; service/metrics/collector.go gathers host metrics. Identify likely integration boundaries, suggest three high-value code searches, and list two risks when adding a new job backend."
+      }
+    ]
+  },
+  {
+    "id": "decode-500",
+    "max_tokens": 500,
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a precise systems analysis assistant. Answer directly, cite concrete evidence from the supplied context, and do not reveal chain-of-thought."
+      },
+      {
+        "role": "user",
+        "content": "Analyze this hypothetical code-review request. A Go application starts external worker binaries, exposes compatible HTTP proxy routes, monitors memory usage, and has a small admin UI. The change adds a new worker backend with backend-specific flags, readiness checks, log streaming, and memory admission control. Produce: 1) an implementation plan ordered by dependency, 2) failure modes and guards, 3) test cases covering process lifecycle and API compatibility, and 4) questions that must be answered from the repository before coding. Keep the response actionable and concise."
+      }
+    ]
+  },
+  {
+    "id": "prefill-4k",
+    "max_tokens": 128,
+    "repeat_user_content": 24,
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a precise systems analysis assistant. Answer directly and do not reveal chain-of-thought."
+      },
+      {
+        "role": "user",
+        "content": "Review the following repeated service inventory and state the three most important architectural boundaries to inspect before adding a backend:\n\nmain.go wires the API and services. api/router.go configures routes. api/jobs.go handles job requests. service/worker/lifecycle.go owns subprocess creation, shutdown, and readiness. service/worker/metrics.go parses backend metrics. service/worker/memory.go estimates usage. service/metrics/collector.go polls host metrics. admin/pages/Jobs.svelte contains the launch form. admin/pages/Instances.svelte renders active workers. docs describe operational conventions.\n\n"
+      }
+    ]
+  }
+]

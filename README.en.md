@@ -99,6 +99,7 @@ automated agent. The result reports under `docs/` follow the EN + RU convention.
 | Which flag affects prefill/decode/VRAM | [WHAT_INFLUENCES_WHAT.md](WHAT_INFLUENCES_WHAT.md) |
 | Run / rebuild / rollback / troubleshoot | [RUNBOOK.md](RUNBOOK.md) |
 | Agent task: rebuild and validate automatically | [AGENT_PROMPT.md](AGENT_PROMPT.md) |
+| Prefill/generation monitoring handoff for another host | [docs/monitoring-prefill-generation-handoff.md](docs/monitoring-prefill-generation-handoff.md) (RU) |
 | DP2A A/B on the 3-GPU profile | [docs/cmp50hx-dp2a-df03399-result.md](docs/cmp50hx-dp2a-df03399-result.md) |
 | DP2A + `-fmad=false` A/B | [docs/cmp50hx-dp2a-no-fmad-df03399-result.md](docs/cmp50hx-dp2a-no-fmad-df03399-result.md) |
 | Split / ubatch / MTP placement study | [docs/cmp50hx-split-ubatch-mtp-df03399-result.md](docs/cmp50hx-split-ubatch-mtp-df03399-result.md) |

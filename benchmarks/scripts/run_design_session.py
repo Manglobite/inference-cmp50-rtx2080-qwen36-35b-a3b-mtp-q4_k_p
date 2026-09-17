@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import re
+import shutil
 import sqlite3
 import subprocess
 import sys
@@ -135,30 +136,55 @@ def main():
     parser.add_argument("--max-tokens", type=int, default=1800)
     parser.add_argument("--tool-rounds", type=int, default=8)
     parser.add_argument("--results-dir", type=Path, default=ROOT / "benchmarks/results")
+    run_mod.add_endpoint_args(parser)
+    parser.add_argument("--no-telemetry", action="store_true")
     args = parser.parse_args()
 
-    profile = json.loads((args.profile if args.profile.is_absolute() else ROOT / args.profile).read_text())
-    variant = profile["profiles"][args.variant]
-    port = args.port or variant["port"]
-    base_url = f"http://127.0.0.1:{port}"
+    base_url_override, api_key, model_override = run_mod.resolve_endpoint(args)
+    attach = args.attach or base_url_override is not None
+    profile = None
+    metadata = {"build_variant": None, "binary_path": None, "binary_sha256": None,
+                "manifest_path": None, "manifest_sha256": None}
+    command, environment = [], {}
+    if args.profile is not None:
+        profile = json.loads((args.profile if args.profile.is_absolute() else ROOT / args.profile).read_text())
+        variant = profile["profiles"][args.variant]
+        served_model = model_override or profile["served_model_name"]
+        port = args.port or variant["port"]
+        if attach:
+            base_url = base_url_override or f"http://127.0.0.1:{port}"
+        else:
+            base_url = f"http://127.0.0.1:{port}"
+            command, environment = run_mod.command_for(profile, variant, port)
+        metadata = run_mod.build_variant_metadata(profile)
+    else:
+        if not attach:
+            raise SystemExit("provide --profile (managed) or --attach --model M --base-url URL")
+        if not model_override:
+            raise SystemExit("--model (or LLAMA_MODEL) is required in attach mode")
+        base_url = base_url_override or "http://127.0.0.1:8080"
+        served_model = model_override
     script = json.loads((args.script if args.script.is_absolute() else ROOT / args.script).read_text())
 
-    metadata = run_mod.build_variant_metadata(profile)
-    run_id = f"{dt.datetime.now().strftime('%Y%m%d-%H%M%S')}-{profile['name']}-{args.label}"
+    profile_name = profile["name"] if profile else "attach"
+    run_id = f"{dt.datetime.now().strftime('%Y%m%d-%H%M%S')}-{profile_name}-{args.label}"
     result_dir = args.results_dir / run_id
     artifacts = result_dir / "artifacts"
     result_dir.mkdir(parents=True, exist_ok=False)
     artifacts.mkdir()
-    command, environment = run_mod.command_for(profile, variant, port)
-    (result_dir / "profile.json").write_text(json.dumps(profile, indent=2) + "\n")
-    (result_dir / "command.json").write_text(json.dumps(command, indent=2) + "\n")
+    if profile is not None:
+        (result_dir / "profile.json").write_text(json.dumps(profile, indent=2) + "\n")
+    if command:
+        (result_dir / "command.json").write_text(json.dumps(command, indent=2) + "\n")
     (result_dir / "build-variant.json").write_text(json.dumps(metadata, indent=2) + "\n")
     (result_dir / "script.json").write_text(json.dumps(script, ensure_ascii=False, indent=2) + "\n")
     (result_dir / "tools.json").write_text(json.dumps(TOOLS, ensure_ascii=False, indent=2) + "\n")
 
-    telemetry = subprocess.Popen(
-        [sys.executable, str(ROOT / "benchmarks/scripts/host_telemetry.py"), str(result_dir / "host-telemetry.csv"), "0.5"]
-    )
+    telemetry = None
+    if not attach and not args.no_telemetry and shutil.which("nvidia-smi"):
+        telemetry = subprocess.Popen(
+            [sys.executable, str(ROOT / "benchmarks/scripts/host_telemetry.py"), str(result_dir / "host-telemetry.csv"), "0.5"]
+        )
     log_path = result_dir / "server.log"
     transcript_path = result_dir / "transcript.jsonl"
     dialogue_path = result_dir / "dialogue.md"
@@ -169,10 +195,13 @@ def main():
     started_at = dt.datetime.now(dt.timezone.utc).isoformat()
     try:
         with log_path.open("w") as server_log, transcript_path.open("w") as transcript, dialogue_path.open("w") as dialogue:
-            process = subprocess.Popen(command, cwd=ROOT, env=environment, stdout=server_log, stderr=subprocess.STDOUT)
+            process = None
+            if not attach:
+                process = subprocess.Popen(command, cwd=ROOT, env=environment, stdout=server_log, stderr=subprocess.STDOUT)
             dialogue.write("# Сессия проектирования (360k)\n\n**System:** " + script["system"] + "\n\n")
             try:
-                run_mod.wait_ready(base_url, process, 900)
+                if process is not None:
+                    run_mod.wait_ready(base_url, process, 900)
                 for user_index, user_text in enumerate(script["user"], start=1):
                     conversation.append({"role": "user", "content": user_text})
                     dialogue.write(f"## Пользователь, шаг {user_index}\n\n{user_text}\n\n")
@@ -180,7 +209,7 @@ def main():
                     for round_index in range(1, args.tool_rounds + 1):
                         offset = log_path.stat().st_size
                         payload = {
-                            "model": profile["served_model_name"],
+                            "model": served_model,
                             "messages": conversation,
                             "max_tokens": args.max_tokens,
                             "temperature": 0.0,
@@ -191,7 +220,8 @@ def main():
                         }
                         started = time.perf_counter()
                         started_epoch = time.time()
-                        response = run_mod.request_json(f"{base_url}/v1/chat/completions", payload, timeout=7200)
+                        response = run_mod.request_json(f"{base_url}/v1/chat/completions", payload,
+                                                        timeout=7200, api_key=api_key, retries=args.retries)
                         ended_epoch = time.time()
                         elapsed = time.perf_counter() - started
                         time.sleep(0.3)
@@ -219,6 +249,7 @@ def main():
                             "accept_mean_len": acc["mean_len"] if acc else None,
                             "content_chars": len(response.get("completion") or ""),
                             "tool_calls": [tc.get("function", {}).get("name") for tc in (response.get("tool_calls") or [])],
+                            "timings": response.get("timings") or {},
                         }
                         api_calls.append(call)
                         print(f"[{user_index}.{round_index}] prompt={call['prompt_tokens']} eval={call['evaluated_tokens']} "
@@ -259,13 +290,15 @@ def main():
                         dialogue.write(f"**Ассистент:**\n\n{content}\n\n")
                         break
             finally:
-                run_mod.stop_process(process)
+                if process is not None:
+                    run_mod.stop_process(process)
     finally:
-        telemetry.terminate()
-        try:
-            telemetry.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            telemetry.kill()
+        if telemetry is not None:
+            telemetry.terminate()
+            try:
+                telemetry.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                telemetry.kill()
 
     (result_dir / "metrics.json").write_text(json.dumps({"run_id": run_id, "started_at": started_at,
                                                          "calls": api_calls}, ensure_ascii=False, indent=2) + "\n")

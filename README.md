@@ -98,6 +98,7 @@ qwen36-35b-a3b/
 | Что влияет на prefill/decode/VRAM | [WHAT_INFLUENCES_WHAT.ru.md](WHAT_INFLUENCES_WHAT.ru.md) |
 | Запуск / пересборка / откат / диагностика | [RUNBOOK.ru.md](RUNBOOK.ru.md) |
 | Задание для агента: собрать и проверить автоматически | [AGENT_PROMPT.md](AGENT_PROMPT.md) (EN) |
+| Мониторинг префила/генерации: передача для агента на другом хосте | [docs/monitoring-prefill-generation-handoff.md](docs/monitoring-prefill-generation-handoff.md) |
 | DP2A A/B на трёх-GPU профиле | [docs/cmp50hx-dp2a-df03399-result.ru.md](docs/cmp50hx-dp2a-df03399-result.ru.md) |
 | DP2A + `-fmad=false` A/B | [docs/cmp50hx-dp2a-no-fmad-df03399-result.ru.md](docs/cmp50hx-dp2a-no-fmad-df03399-result.ru.md) |
 | Split / ubatch / размещение MTP | [docs/cmp50hx-split-ubatch-mtp-df03399-result.ru.md](docs/cmp50hx-split-ubatch-mtp-df03399-result.ru.md) |

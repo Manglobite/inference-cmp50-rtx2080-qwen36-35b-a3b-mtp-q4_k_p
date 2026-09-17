@@ -16,3 +16,5 @@ llama.cpp/runtime-baseline/
 llama.cpp/runtime-dp2a/
 llama.cpp/src/build/
 llama.cpp/src/build-*/
+__pycache__/
+*.pyc

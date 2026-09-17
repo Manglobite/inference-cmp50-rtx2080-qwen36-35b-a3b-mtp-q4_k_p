@@ -134,10 +134,10 @@ Each run directory contains `result.json`/`metrics.json`, `server.log`,
 - Adopted -> baseline: `bash scripts/launch-server-baseline.sh` (needs the
   baseline build), or start the adopted launcher with
   `SPEC_N_MAX=1 DEVICES=CUDA0,CUDA1,CUDA2 TENSOR_SPLIT=1,3,1 UBATCH_SIZE=448`.
-- If anything on the live host is managed by `inference-hub`, stop/start the
-  server through its API (`/api/backends/<pid>/stop`,
+- If anything on the live host is managed by an external control plane,
+  stop/start the server through its API (`/api/backends/<pid>/stop`,
   `/api/profiles/<script>/start`) and keep `idleAfterSeconds` accounted for:
-  the hub locks CMP clocks to 300 MHz after the idle timeout, which distorts
+  the control plane locks CMP clocks to 300 MHz after the idle timeout, which distorts
   benchmarks until the next wake.
 
 ## 6. Troubleshooting

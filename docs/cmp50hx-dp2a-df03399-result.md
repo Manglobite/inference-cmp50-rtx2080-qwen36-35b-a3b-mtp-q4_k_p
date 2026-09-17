@@ -69,9 +69,9 @@ and every paired completion was byte-for-byte equal.
   and `result.json` with the raw llama.cpp timings.
 - CMP binding: CMPs at `00000000:03:00.0` and `00000000:08:00.0`, RTX at
   `00000000:04:00.0`. During the DeepSeek control the RTX stayed at 1 MiB.
-- Before the window `inference-hub` idle GPU clock lock was disabled
+- Before the window the control plane idle GPU clock lock was disabled
   (`idleAfterSeconds=0`) and clocks were reset; both were restored afterwards.
-  The live Qwen3.6 server was stopped through the hub API and started again
+  The live Qwen3.6 server was stopped through the control plane API and started again
   after the measurements; downtime was about 20 minutes.
 
 ## Results

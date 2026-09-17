@@ -135,9 +135,9 @@ python3 benchmarks/scripts/run_design_session.py \
 - Принятый → baseline: `bash scripts/launch-server-baseline.sh` (нужна
   baseline-сборка) либо запуск принятого лаунчера с
   `SPEC_N_MAX=1 DEVICES=CUDA0,CUDA1,CUDA2 TENSOR_SPLIT=1,3,1 UBATCH_SIZE=448`.
-- Если на живом хосте всем управляет `inference-hub`, останавливайте/запускайте
+- Если на живом хосте всем управляет внешний control plane, останавливайте/запускайте
   сервер через его API (`/api/backends/<pid>/stop`,
-  `/api/profiles/<script>/start`) и помните про `idleAfterSeconds`: hub
+  `/api/profiles/<script>/start`) и помните про `idleAfterSeconds`: control plane
   блокирует частоты CMP на 300 МГц после простоя, что искажает бенчмарки до
   следующего пробуждения.
 

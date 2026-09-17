@@ -7,6 +7,7 @@ import json
 import platform
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 
@@ -48,12 +49,26 @@ def binary_provenance(binary, build_variant, manifest):
     return provenance
 
 
+def http_json(url, api_key, timeout=10):
+    headers = {}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    try:
+        request = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return json.load(response)
+    except Exception as exc:  # noqa: BLE001
+        return {"unavailable": str(exc)}
+
+
 def main():
     root = Path(__file__).resolve().parents[2]
     parser = argparse.ArgumentParser()
     parser.add_argument("--binary", type=Path)
     parser.add_argument("--build-variant")
     parser.add_argument("--manifest", type=Path)
+    parser.add_argument("--base-url", default=None, help="record provenance of a running server")
+    parser.add_argument("--api-key", default=None)
     args = parser.parse_args()
     environment = {
         "platform": platform.platform(),
@@ -70,6 +85,15 @@ def main():
         ]),
     }
     environment.update(binary_provenance(args.binary, args.build_variant, args.manifest))
+    if args.base_url:
+        base = args.base_url.rstrip("/")
+        props = http_json(f"{base}/props", args.api_key)
+        environment["remote_server"] = {
+            "base_url": base,
+            "props": {k: props.get(k) for k in ("model_alias", "model_path", "build_info", "total_slots")
+                      if isinstance(props, dict)},
+            "models": http_json(f"{base}/v1/models", args.api_key),
+        }
     print(json.dumps(environment, indent=2))
 
 

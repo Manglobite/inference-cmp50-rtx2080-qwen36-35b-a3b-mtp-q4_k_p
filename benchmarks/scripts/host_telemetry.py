@@ -67,8 +67,14 @@ def read_gpus():
 
 
 def main():
-    path = sys.argv[1]
-    interval = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
+    import argparse
+    parser = argparse.ArgumentParser(description="Sample CPU/RAM/GPU telemetry to CSV")
+    parser.add_argument("path", help="output CSV path")
+    parser.add_argument("interval", nargs="?", type=float, default=0.5, help="seconds between samples (default 0.5)")
+    parser.add_argument("--label", default="", help="free-form label stored in the first column")
+    args = parser.parse_args()
+    path = args.path
+    interval = args.interval
     running = True
 
     def stop(*_):
@@ -78,7 +84,7 @@ def main():
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
 
-    header = ["ts", "cpu_pct", "cpu_temp_c", "ram_used_gib", "ram_total_gib", "swap_used_gib"]
+    header = ["ts", "label", "cpu_pct", "cpu_temp_c", "ram_used_gib", "ram_total_gib", "swap_used_gib"]
     for i in range(3):
         header += [f"gpu{i}_temp", f"gpu{i}_util", f"gpu{i}_mem_used", f"gpu{i}_mem_total", f"gpu{i}_power"]
     with open(path, "w", newline="") as handle:
@@ -94,6 +100,7 @@ def main():
             ram_used, ram_total, swap_used = read_mem()
             row = [
                 time.strftime("%Y-%m-%dT%H:%M:%S"),
+                args.label,
                 round(cpu_pct, 1),
                 cpu_temp_c(),
                 ram_used,

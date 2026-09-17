@@ -148,7 +148,7 @@ python3 benchmarks/scripts/run.py \
 python3 benchmarks/scripts/run.py \
   --profile benchmarks/profiles/llama-cpp-qwen36-35b-a3b-uncensored-q4-3gpu-df03399-dp2a-no-fmad-split31-ub448-nocache.json \
   --variant native-262k --cases repo-28k \
-  --prompts benchmarks/prompts/repository-context.json --repetitions 1
+  --prompts benchmarks/prompts/repository-context-synthetic.json --repetitions 1
 
 # MTP placement diagnostic (needs -lv 5 in the profile, GGML_SCHED_DEBUG=1)
 python3 benchmarks/scripts/run.py \
