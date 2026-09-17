@@ -40,20 +40,26 @@ answered the smoke prompt (`2 + 2 = 4`) and stopped cleanly.
 ## Quick start (ready runtime)
 
 ```bash
-# 1. put the model files into ./models (see RUNBOOK.md and AGENT_PROMPT.md)
+# 1. get the runtime: download the release asset into llama.cpp/runtime/
+bash scripts/fetch-runtime.sh
+#    (or build it locally: bash scripts/build-df03399.sh no-fmad /tmp/llama-nofmad)
+
+# 2. put the model files into ./models (see RUNBOOK.md and AGENT_PROMPT.md)
 #    Qwen3.6-35B-A3B-Uncensored-HauhauCS-MTP-Q4_K_P.gguf
 #    mmproj-Qwen3.6-35B-A3B-Uncensored-HauhauCS-MTP-f16.gguf
 
-# 2. start the adopted three-GPU profile (RTX tail, MTP 3, 262144 ctx)
+# 3. start the adopted three-GPU profile (RTX tail, MTP 3, 262144 ctx)
 bash scripts/launch-server.sh
 
-# 3. health + smoke
+# 4. health + smoke
 curl -s http://127.0.0.1:8085/health
 ```
 
-The bundled runtime in `llama.cpp/runtime/bin/` is already built with the
-patched DP2A path and `-fmad=false`, so no compilation is required to run it.
-For rebuilds and for other machines use `scripts/build-df03399.sh`.
+The runtime is distributed as a GitHub release asset (~53 MB compressed,
+DP2A patch + `-fmad=false`), so no compilation is required to run it; the
+script verifies its SHA-256. Build artifacts and the source snapshot are not
+tracked in Git - rebuild them with `scripts/build-df03399.sh` if you prefer
+or need another mode.
 
 ## Repository layout
 
@@ -68,8 +74,8 @@ qwen36-35b-a3b/
 ├── AGENT_PROMPT.md            <- self-contained task for another agent (EN only)
 ├── LICENSE-NOTICE.md / .ru.md <- licenses for llama.cpp, patch, model
 ├── llama.cpp/
-│   ├── runtime/               <- ready llama-server + libs + manifest (220 MB)
-│   └── src/                   <- patched df03399 source snapshot (172 MB)
+│   ├── runtime/               <- ready llama-server + libs (release asset, not in Git)
+│   └── src/                   <- patched df03399 source (build artifact, not in Git)
 ├── patches/                   <- ported PR #25834 patch (df03399)
 ├── scripts/                   <- launchers, build script, benchmark harness
 ├── profiles/                  <- benchmark profile JSONs for every experiment

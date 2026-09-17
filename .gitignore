@@ -1,3 +1,10 @@
+# llama.cpp build artifacts and model weights are not tracked in Git.
+# The runtime is published as a GitHub release asset (see README.md), the
+# source snapshot is reproducible with scripts/build-df03399.sh.
+llama.cpp/runtime/
+llama.cpp/src/
+dist/
+
 # Model weights are large and not committed.
 models/*.gguf
 
@@ -9,8 +16,3 @@ llama.cpp/runtime-baseline/
 llama.cpp/runtime-dp2a/
 llama.cpp/src/build/
 llama.cpp/src/build-*/
-llama.cpp/runtime/
-llama.cpp/src/
-models/
-benchmarks/results/
-dist/

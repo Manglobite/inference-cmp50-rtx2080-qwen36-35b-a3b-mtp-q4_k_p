@@ -41,20 +41,25 @@ smoke-запрос (`2 + 2 = 4`) и корректно остановился.
 ## Быстрый старт (готовый рантайм)
 
 ```bash
-# 1. положите файлы модели в ./models (см. RUNBOOK.ru.md и AGENT_PROMPT.md)
+# 1. получите рантайм: скачивание ассета релиза в llama.cpp/runtime/
+bash scripts/fetch-runtime.sh
+#    (либо собрать локально: bash scripts/build-df03399.sh no-fmad /tmp/llama-nofmad)
+
+# 2. положите файлы модели в ./models (см. RUNBOOK.ru.md и AGENT_PROMPT.md)
 #    Qwen3.6-35B-A3B-Uncensored-HauhauCS-MTP-Q4_K_P.gguf
 #    mmproj-Qwen3.6-35B-A3B-Uncensored-HauhauCS-MTP-f16.gguf
 
-# 2. запустите принятый трёх-GPU профиль (RTX-хвост, MTP 3, контекст 262144)
+# 3. запустите принятый трёх-GPU профиль (RTX-хвост, MTP 3, контекст 262144)
 bash scripts/launch-server.sh
 
-# 3. health + smoke
+# 4. health + smoke
 curl -s http://127.0.0.1:8085/health
 ```
 
-Рантайм в `llama.cpp/runtime/bin/` уже собран с патчем DP2A и `-fmad=false`,
-поэтому для запуска компиляция не нужна. Для пересборки и других машин —
-`scripts/build-df03399.sh`.
+Рантайм распространяется ассетом GitHub-релиза (~53 МБ в сжатом виде, патч
+DP2A + `-fmad=false`), поэтому для запуска компиляция не нужна; скрипт
+проверяет SHA-256. Артефакты сборки и снимок исходников в Git не хранятся —
+пересоберите их через `scripts/build-df03399.sh`, если нужно.
 
 ## Структура репозитория
 
@@ -68,8 +73,8 @@ qwen36-35b-a3b/
 ├── AGENT_PROMPT.md            <- задание для агента (только английский)
 ├── LICENSE-NOTICE.md / .ru.md <- лицензии llama.cpp, патча и модели
 ├── llama.cpp/
-│   ├── runtime/               <- готовый llama-server + библиотеки (220 МБ)
-│   └── src/                   <- снимок исходников df03399 с патчем (172 МБ)
+│   ├── runtime/               <- готовый llama-server + библиотеки (ассет релиза, не в Git)
+│   └── src/                   <- исходники df03399 с патчем (артефакт сборки, не в Git)
 ├── patches/                   <- портированный патч PR #25834 (df03399)
 ├── scripts/                   <- лаунчеры, сборка, harness бенчмарков
 ├── profiles/                  <- JSON-профили всех экспериментов

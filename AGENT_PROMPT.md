@@ -83,6 +83,18 @@ If a hash differs, stop and report; do not benchmark an unknown model.
 
 ## Phase 3 - run the bundled runtime
 
+The runtime is not tracked in Git. Get it first:
+
+```bash
+# download the release asset (verifies SHA-256 and unpacks to llama.cpp/runtime/)
+bash scripts/fetch-runtime.sh
+# or build it locally (about 8 minutes):
+# bash scripts/build-df03399.sh no-fmad /tmp/llama-nofmad
+# cp -a /tmp/llama-nofmad/bin llama.cpp/runtime/
+```
+
+Then start the server:
+
 ```bash
 bash scripts/launch-server.sh > reports/01-server.log 2>&1 &
 # wait for health

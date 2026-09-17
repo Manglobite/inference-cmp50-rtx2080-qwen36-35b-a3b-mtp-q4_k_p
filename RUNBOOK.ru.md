@@ -32,7 +32,18 @@ sha256sum models/*.gguf
 
 Альтернатива: `huggingface-cli download morikomorizz/Qwen3.6-35B-A3B-Uncensored-HauhauCS-MTP --local-dir models`.
 
-## 2. Запуск принятого профиля (готовый рантайм, без сборки)
+## 2. Запуск принятого профиля (рантайм из релиза, без сборки)
+
+Рантайм в Git не хранится; сначала скачайте ассет релиза (скрипт сверит
+SHA-256 и распакует в `llama.cpp/runtime/`), либо соберите локально:
+
+```bash
+bash scripts/fetch-runtime.sh
+# либо: bash scripts/build-df03399.sh no-fmad /tmp/llama-nofmad
+#       cp -a /tmp/llama-nofmad/bin llama.cpp/runtime/
+```
+
+Затем запустите сервер:
 
 ```bash
 bash scripts/launch-server.sh

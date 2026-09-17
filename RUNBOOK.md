@@ -32,7 +32,18 @@ sha256sum models/*.gguf
 
 Alternative: `huggingface-cli download morikomorizz/Qwen3.6-35B-A3B-Uncensored-HauhauCS-MTP --local-dir models`.
 
-## 2. Start the adopted profile (bundled runtime, no build)
+## 2. Start the adopted profile (release runtime, no build)
+
+The runtime is not tracked in Git; download the release asset first (it is
+verified and unpacked into `llama.cpp/runtime/`), or build it locally:
+
+```bash
+bash scripts/fetch-runtime.sh
+# or: bash scripts/build-df03399.sh no-fmad /tmp/llama-nofmad
+#     cp -a /tmp/llama-nofmad/bin llama.cpp/runtime/
+```
+
+Then start the server:
 
 ```bash
 bash scripts/launch-server.sh
